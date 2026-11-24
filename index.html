@@ -159,6 +159,74 @@
   <footer>
     © 2026 Surjo Ghosh
   </footer>
+<audio id="bgMusic" loop>
+  <source src="Khuda_Aur_Mohabbat___Lyrical_OST___Rahat_Fateh_Ali_Khan.mp3" type="audio/mpeg">
+</audio>
+
+<button onclick="document.getElementById('bgMusic').play()">
+  🎵 Play Music
+</button>
+
+<section style="text-align:center;padding:20px;">
+<h2>🏎️ Car Racing Game</h2>
+<p>গাড়ি এড়িয়ে স্কোর বাড়াও!</p>
+
+<div id="game" style="width:280px;height:400px;max-width:100%;margin:auto;background:#333;position:relative;overflow:hidden;border:3px solid white;">
+<div id="player" style="position:absolute;bottom:10px;left:120px;font-size:35px;">🚗</div>
+<div id="enemy" style="position:absolute;top:0;left:60px;font-size:35px;">🚙</div>
+</div>
+
+<h3>Score: <span id="score">0</span></h3>
+<button onclick="startGame()">▶ Start Game</button>
+<button onclick="moveCar(-1)">⬅️ Left</button>
+<button onclick="moveCar(1)">Right ➡️</button>
+<p id="msg">Start চাপো!</p>
+</section>
+
+<script>
+let p=120,y=0,s=0,run=false,raf;
+const car=document.getElementById("player");
+const enemy=document.getElementById("enemy");
+
+function moveCar(d){
+if(!run)return;
+p=Math.max(0,Math.min(240,p+d*25));
+car.style.left=p+"px";
+}
+
+function startGame(){
+cancelAnimationFrame(raf);
+p=120;y=0;s=0;run=true;
+car.style.left=p+"px";
+document.getElementById("score").innerText=s;
+document.getElementById("msg").innerText="Good Luck!";
+enemy.style.left=Math.floor(Math.random()*6)*40+"px";
+play();
+}
+
+function play(){
+if(!run)return;
+y+=4+s/10;
+enemy.style.top=y+"px";
+let ex=parseInt(enemy.style.left);
+if(y>330 && y<390 && Math.abs(p-ex)<35){
+run=false;
+document.getElementById("msg").innerText="Game Over! Score: "+s;
+return;
+}
+if(y>410){
+y=-40;s++;
+document.getElementById("score").innerText=s;
+enemy.style.left=Math.floor(Math.random()*6)*40+"px";
+}
+raf=requestAnimationFrame(play);
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="ArrowLeft")moveCar(-1);
+if(e.key==="ArrowRight")moveCar(1);
+});
+</script>
 
 </body>
 </html>
