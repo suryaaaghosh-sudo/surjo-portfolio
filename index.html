@@ -167,66 +167,128 @@
   🎵 Play Music
 </button>
 
+
 <section style="text-align:center;padding:20px;">
-<h2>🏎️ Car Racing Game</h2>
-<p>গাড়ি এড়িয়ে স্কোর বাড়াও!</p>
+<h2>🏍️ Surjo Bike Racing</h2>
+<p>Collect coins and avoid cars!</p>
 
-<div id="game" style="width:280px;height:400px;max-width:100%;margin:auto;background:#333;position:relative;overflow:hidden;border:3px solid white;">
-<div id="player" style="position:absolute;bottom:10px;left:120px;font-size:35px;">🚗</div>
-<div id="enemy" style="position:absolute;top:0;left:60px;font-size:35px;">🚙</div>
-</div>
+<canvas id="bikeGame" width="320" height="500"
+style="width:100%;max-width:320px;background:#333;border:3px solid #00ffbb;border-radius:12px;">
+</canvas>
 
-<h3>Score: <span id="score">0</span></h3>
-<button onclick="startGame()">▶ Start Game</button>
-<button onclick="moveCar(-1)">⬅️ Left</button>
-<button onclick="moveCar(1)">Right ➡️</button>
-<p id="msg">Start চাপো!</p>
+<h3>Score: <span id="bikeScore">0</span></h3>
+
+<button onclick="startBike()">▶ START GAME</button>
+<br>
+<button onclick="moveBike(-1)">⬅ LEFT</button>
+<button onclick="moveBike(1)">RIGHT ➡</button>
 </section>
 
 <script>
-let p=120,y=0,s=0,run=false,raf;
-const car=document.getElementById("player");
-const enemy=document.getElementById("enemy");
+const canvas=document.getElementById("bikeGame");
+const ctx=canvas.getContext("2d");
 
-function moveCar(d){
-if(!run)return;
-p=Math.max(0,Math.min(240,p+d*25));
-car.style.left=p+"px";
-}
+let bx=145, enemies=[], coins=[], score=0;
+let running=false, frame=0, speed=4;
 
-function startGame(){
-cancelAnimationFrame(raf);
-p=120;y=0;s=0;run=true;
-car.style.left=p+"px";
-document.getElementById("score").innerText=s;
-document.getElementById("msg").innerText="Good Luck!";
-enemy.style.left=Math.floor(Math.random()*6)*40+"px";
-play();
+function moveBike(d){
+ bx=Math.max(5,Math.min(280,bx+d*35));
 }
 
-function play(){
-if(!run)return;
-y+=4+s/10;
-enemy.style.top=y+"px";
-let ex=parseInt(enemy.style.left);
-if(y>330 && y<390 && Math.abs(p-ex)<35){
-run=false;
-document.getElementById("msg").innerText="Game Over! Score: "+s;
-return;
-}
-if(y>410){
-y=-40;s++;
-document.getElementById("score").innerText=s;
-enemy.style.left=Math.floor(Math.random()*6)*40+"px";
-}
-raf=requestAnimationFrame(play);
+function startBike(){
+ cancelAnimationFrame(window.bikeRAF);
+ bx=145;
+ enemies=[];
+ coins=[];
+ score=0;
+ frame=0;
+ speed=4;
+ running=true;
+
+ document.getElementById("bgMusic").play().catch(()=>{});
+ bikeLoop();
 }
 
-document.addEventListener("keydown",e=>{
-if(e.key==="ArrowLeft")moveCar(-1);
-if(e.key==="ArrowRight")moveCar(1);
+function bikeLoop(){
+ if(!running)return;
+
+ ctx.clearRect(0,0,320,500);
+
+ ctx.fillStyle="#444";
+ ctx.fillRect(0,0,320,500);
+
+ ctx.fillStyle="white";
+ for(let y=(frame*speed)%80-80;y<500;y+=80){
+ ctx.fillRect(155,y,8,40);
+ }
+
+ if(frame%65===0)
+ enemies.push({x:20+Math.random()*260,y:-70});
+
+ if(frame%90===0)
+ coins.push({x:20+Math.random()*270,y:-20});
+
+ enemies.forEach(e=>e.y+=speed);
+ coins.forEach(o=>o.y+=speed);
+
+ ctx.fillStyle="red";
+ enemies.forEach(e=>{
+ ctx.fillRect(e.x,e.y,30,55);
+ ctx.fillStyle="#fff";
+ ctx.fillRect(e.x+5,e.y+8,20,12);
+ ctx.fillStyle="red";
+ });
+
+ ctx.fillStyle="gold";
+ coins.forEach(o=>{
+ ctx.beginPath();
+ ctx.arc(o.x,o.y,10,0,Math.PI*2);
+ ctx.fill();
+ });
+
+ ctx.fillStyle="#00e5ff";
+ ctx.fillRect(bx+8,420,20,55);
+ ctx.fillStyle="black";
+ ctx.fillRect(bx,425,8,15);
+ ctx.fillRect(bx+28,425,8,15);
+ ctx.fillRect(bx,455,8,15);
+ ctx.fillRect(bx+28,455,8,15);
+
+ for(let e of enemies){
+ if(e.y+55>420 && e.y<475 &&
+ bx<e.x+30 && bx+36>e.x){
+ running=false;
+ document.getElementById("bgMusic").pause();
+ alert("GAME OVER! Score: "+score);
+ return;
+ }
+ }
+
+ coins=coins.filter(o=>{
+ if(Math.abs(o.x-(bx+18))<22 &&
+ Math.abs(o.y-445)<30){
+ score+=10;
+ return false;
+ }
+ return o.y<520;
+ });
+
+ enemies=enemies.filter(e=>e.y<520);
+
+ document.getElementById("bikeScore").innerText=score;
+ score++;
+ frame++;
+ speed=Math.min(8,4+score/500);
+
+ window.bikeRAF=requestAnimationFrame(bikeLoop);
+}
+
+document.addEventListener("keydown",function(e){
+ if(e.key==="ArrowLeft")moveBike(-1);
+ if(e.key==="ArrowRight")moveBike(1);
 });
 </script>
+
 
 </body>
 </html>
